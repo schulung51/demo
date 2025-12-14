@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badge-gen"
-version = "0.1.0"
+version = "0.2.0"
 description = "Simple badge generator used as GitHub Actions training project"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -13,6 +13,14 @@ authors = [
 ]
 
 dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.0",
+    "mypy>=1.5",
+]
 
 [project.scripts]
 badge-gen = "badge_gen.cli:main"
@@ -25,3 +33,7 @@ select = ["E", "F", "I"]
 [tool.mypy]
 python_version = "3.10"
 strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"

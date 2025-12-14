@@ -1,1 +1,2 @@
-__version__ = "0.1.0"
+"""Badge generator for GitHub repositories."""
+__version__ = "0.2.0"

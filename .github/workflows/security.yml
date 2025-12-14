@@ -1,0 +1,81 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 2 * * 1'  # Montags 2 Uhr
+
+jobs:
+  bandit:
+    name: Bandit (Code Security)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit scan
+        run: bandit -r src/ -f json -o bandit-report.json || true
+
+      - name: Upload Bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+  pip-audit:
+    name: pip-audit (PyPI Vulnerabilities)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Install project dependencies
+        run: pip install -e .
+
+      - name: Run pip-audit
+        run: pip-audit --format json --output pip-audit-report.json || true
+
+      - name: Upload pip-audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+
+  aggregate:
+    name: Aggregate Security Results
+    needs: [bandit, pip-audit]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download all reports
+        uses: actions/download-artifact@v4
+        with:
+          path: security-reports
+
+      - name: List reports
+        run: |
+          echo "=== Security Reports ==="
+          find security-reports -type f -name "*.json"
+
+      - name: Check for critical issues
+        run: |
+          echo "Analyzing security reports..."
+          # Placeholder für Report-Analyse
+          # Bei kritischen Issues könnte hier exit 1 stehen
+          echo "Security audit complete"
