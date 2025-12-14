@@ -1,61 +1,14 @@
-# Changelog
+## [0.7.0](https://github.com/schulung51/demo/compare/v0.6.0...v0.7.0) (2025-12-14)
 
-All notable changes to this project will be documented in this file.
 
-## [0.6.0] - 2025-01-15
+### Features
 
-### Added
-- Composite Actions for reusable CI components
-  - `setup-python-env`: Python setup with caching
-  - `quality-checks`: Linting, type checking, formatting
-  - `run-tests`: Tests with coverage reporting
-- Reusable workflow `ci-reusable.yml`
-- SHA-pinning for all third-party actions
-- Dependabot configuration for automatic updates
-- Security policy documentation
-- Actions documentation in docs/ACTIONS.md
+* add composite actions and reusable workflows ([db3aa5b](https://github.com/schulung51/demo/commit/db3aa5b530b1221038c89f934d61bce609aef962))
 
-### Changed
-- CI workflow now uses local Composite Actions
-- All action references use commit SHAs
+## [0.6.0](https://github.com/schulung51/demo/compare/3e6ad19aa458c7ecbcb43aa0ec2e78249145f6d2...v0.6.0) (2025-12-14)
 
-### Security
-- Implemented SHA-pinning for supply chain security
-- Added Dependabot for automated security updates
 
-## [0.5.0] - 2025-01-01
+### Features
 
-### Added
-- Repository automation with auto-format workflow
-- Conventional commits support
-- Automated changelog generation
-- Release workflow with GitHub Releases
+* add repository automation and release workflow ([3e6ad19](https://github.com/schulung51/demo/commit/3e6ad19aa458c7ecbcb43aa0ec2e78249145f6d2))
 
-## [0.4.0] - 2024-12-15
-
-### Added
-- Caching for pip dependencies
-- Debug workflow for troubleshooting
-- Local testing support with act
-- Makefile for development commands
-
-## [0.3.0] - 2024-12-01
-
-### Added
-- GitHub Pages deployment workflow
-- Environment-based deployments
-- Secrets and variables demonstration
-
-## [0.2.0] - 2024-11-15
-
-### Added
-- Multi-platform CI
-- Matrix testing
-- Security scanning workflows
-
-## [0.1.0] - 2024-11-01
-
-### Added
-- Initial project setup
-- Basic CLI structure
-- CI workflow with linting
