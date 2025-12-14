@@ -8,66 +8,80 @@ Dieses Repository demonstriert GitHub Actions Konzepte:
 - Kapitel 1: Event-Modell, Runner, Workflow-Syntax
 - Kapitel 2: Jobs, Matrix-Strategien, Failure-Handling
 - Kapitel 3: Secrets, Variables, Permissions, Environments
+- Kapitel 4: Caching, Debugging, Performance-Optimierung
 
 ## Lokale Entwicklung
 
 ```bash
 # Installation mit Dev-Dependencies
-pip install -e .[dev]
-
-# CLI ausführen
-badge-gen --repo octocat/Hello-World
+make install
+# oder: pip install -e .[dev]
 
 # Tests ausführen
-pytest
+make test
+make test-cov  # mit Coverage
+
+# Code-Qualität
+make lint
+make type-check
 
 # Package bauen
-python -m build
+make build
+```
+
+## Lokales Workflow-Testing mit act
+
+[act](https://github.com/nektos/act) ermöglicht lokales Testen von GitHub Actions Workflows.
+
+### Installation
+
+```bash
+# macOS
+brew install act
+
+# Linux
+curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+
+# Windows
+choco install act-cli
+```
+
+### Verwendung
+
+```bash
+# Lint-Job lokal testen
+make act-test
+
+# Debug-Workflow ausführen
+make act-debug
+
+# Alle Workflows/Jobs auflisten
+make act-list
+
+# Mit Secrets (Datei aus .secrets.example kopieren)
+cp .secrets.example .secrets
+# Werte eintragen, dann:
+act push --secret-file .secrets
 ```
 
 ## CI/CD Workflows
 
-| Workflow | Zweck |
-|----------|-------|
-| `ci.yml` | Linting und Unit Tests (explizite Permissions) |
-| `multi-platform.yml` | Matrix-Testing (Linux, Windows, macOS) |
-| `security.yml` | Parallele Security-Scans |
-| `pages.yml` | GitHub Pages Deployment |
-| `deploy.yml` | PyPI Deployment mit Environments |
-| `config-demo.yml` | Variables und Secrets Demo |
+| Workflow | Zweck | Caching |
+|----------|-------|---------|
+| `ci.yml` | Lint, Test, Build | ✅ pip cache |
+| `debug.yml` | Context-Dump, System-Info | - |
+| `cache-demo.yml` | Caching-Mechanismen Demo | ✅ |
+| `multi-platform.yml` | Matrix-Testing | ✅ pip cache |
+| `security.yml` | Security-Scans | - |
+| `pages.yml` | GitHub Pages | - |
+| `deploy.yml` | PyPI Deployment | - |
 
-## Environment-Setup
+## Performance-Optimierungen
 
-Für die Deployment-Workflows müssen folgende Environments konfiguriert werden:
+Der CI-Workflow nutzt folgende Optimierungen:
 
-### Staging Environment
-- **Name:** `staging`
-- **Deployment Branches:** `develop`
-- **Secrets:** `STAGING_PYPI_TOKEN` (optional)
-
-### Production Environment
-- **Name:** `production`
-- **Deployment Branches:** `main`, `v*` tags
-- **Protection Rules:**
-  - Required Reviewers: 1-2 Maintainer
-  - Wait Timer: 10 Minuten (optional)
-- **Secrets:** `PROD_PYPI_TOKEN` (optional)
-
-### GitHub Pages Environment
-- **Name:** `github-pages`
-- Wird automatisch von GitHub erstellt
-
-## Variables und Secrets
-
-### Repository Variables (nicht sensitiv)
-```
-API_URL=https://api.example.com
-LOG_LEVEL=info
-```
-
-### Repository Secrets (sensitiv)
-```
-API_KEY=<your-api-key>
-STAGING_PYPI_TOKEN=<test-pypi-token>
-PROD_PYPI_TOKEN=<pypi-token>
-```
+1. **Caching**: `setup-python` mit `cache: 'pip'`
+2. **Concurrency**: Alte Runs werden bei neuem Push abgebrochen
+3. **Parallele Jobs**: `lint` und `test` laufen gleichzeitig
+4. **Optimierte Matrix**: Windows/macOS nur mit neuester Python-Version
+5. **Selektive Steps**: Coverage nur für Ubuntu+Python 3.12

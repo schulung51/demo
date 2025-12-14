@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badge-gen"
-version = "0.3.0"
+version = "0.4.0"
 description = "Simple badge generator used as GitHub Actions training project"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -38,3 +38,13 @@ strict = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
