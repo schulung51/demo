@@ -1,4 +1,5 @@
 """Command-line interface for badge-gen."""
+
 import argparse
 import sys
 from pathlib import Path
@@ -21,7 +22,7 @@ def create_badge(name: str, value: str, color: str) -> str:
     }
     color_hex = colors.get(color, colors["blue"])
 
-    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{total_width}" height="20">
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{total_width}" height="20">
   <linearGradient id="b" x2="0" y2="100%">
     <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
     <stop offset="1" stop-opacity=".1"/>
@@ -40,37 +41,39 @@ def create_badge(name: str, value: str, color: str) -> str:
     <text x="{name_width + value_width/2}" y="15" fill="#010101" fill-opacity=".3">{value}</text>
     <text x="{name_width + value_width/2}" y="14">{value}</text>
   </g>
-</svg>'''
+</svg>"""
     return svg
 
 
 def main() -> None:
     """Main entry point for the CLI."""
-    parser = argparse.ArgumentParser(
-        description="Generate simple repository badges"
-    )
+    parser = argparse.ArgumentParser(description="Generate simple repository badges")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Create badge command
     create_parser = subparsers.add_parser("create", help="Create a badge")
     create_parser.add_argument(
-        "--name", "-n",
+        "--name",
+        "-n",
         required=True,
         help="Badge label (left side)",
     )
     create_parser.add_argument(
-        "--value", "-v",
+        "--value",
+        "-v",
         required=True,
         help="Badge value (right side)",
     )
     create_parser.add_argument(
-        "--color", "-c",
+        "--color",
+        "-c",
         default="blue",
         choices=["green", "yellow", "red", "blue", "gray", "orange"],
         help="Badge color (default: blue)",
     )
     create_parser.add_argument(
-        "--output", "-o",
+        "--output",
+        "-o",
         help="Output file path (default: stdout)",
     )
 

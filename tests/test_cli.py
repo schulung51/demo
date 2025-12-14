@@ -1,4 +1,5 @@
 """Tests for the badge-gen CLI."""
+
 import subprocess
 import sys
 import tempfile
@@ -44,8 +45,16 @@ def test_cli_create_with_output():
         output = Path(tmpdir) / "badge.svg"
         result = subprocess.run(
             [
-                sys.executable, "-m", "badge_gen.cli",
-                "create", "-n", "test", "-v", "ok", "-o", str(output)
+                sys.executable,
+                "-m",
+                "badge_gen.cli",
+                "create",
+                "-n",
+                "test",
+                "-v",
+                "ok",
+                "-o",
+                str(output),
             ],
             capture_output=True,
             text=True,
