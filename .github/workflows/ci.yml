@@ -5,7 +5,6 @@ on:
     branches: [main, develop]
   pull_request:
 
-# Concurrency: Bei neuem Push auf gleichen Branch alte Runs abbrechen
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,16 +16,21 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    # Skip wenn Release-Commit
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'  # Built-in pip caching
+          cache: 'pip'
 
       - name: Install linters
-        run: pip install ruff mypy
+        run: pip install ruff mypy black
+
+      - name: Check formatting
+        run: black --check src/ tests/
 
       - name: Lint with Ruff
         run: ruff check src/ tests/
@@ -37,16 +41,15 @@ jobs:
   test:
     name: Test (Python ${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.11', '3.12']
         include:
-          # Windows nur mit neuester Python-Version
           - os: windows-latest
             python-version: '3.12'
-          # macOS nur mit neuester Python-Version
           - os: macos-latest
             python-version: '3.12'
 
@@ -56,7 +59,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'  # OS-spezifischer Cache
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -72,27 +75,3 @@ jobs:
         with:
           name: coverage-report
           path: coverage.xml
-
-  build:
-    name: Build Package
-    needs: [lint, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-
-      - name: Install build tools
-        run: pip install build
-
-      - name: Build package
-        run: python -m build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/

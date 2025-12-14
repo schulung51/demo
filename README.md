@@ -9,19 +9,21 @@ Dieses Repository demonstriert GitHub Actions Konzepte:
 - Kapitel 2: Jobs, Matrix-Strategien, Failure-Handling
 - Kapitel 3: Secrets, Variables, Permissions, Environments
 - Kapitel 4: Caching, Debugging, Performance-Optimierung
+- Kapitel 5: Repository-Automatisierung, Releases, Conventional Commits
 
 ## Lokale Entwicklung
 
 ```bash
 # Installation mit Dev-Dependencies
 make install
-# oder: pip install -e .[dev]
+
+# Code formatieren
+make format
 
 # Tests ausführen
 make test
-make test-cov  # mit Coverage
 
-# Code-Qualität
+# Code-Qualität prüfen
 make lint
 make type-check
 
@@ -29,59 +31,62 @@ make type-check
 make build
 ```
 
-## Lokales Workflow-Testing mit act
+## Conventional Commits
 
-[act](https://github.com/nektos/act) ermöglicht lokales Testen von GitHub Actions Workflows.
+Dieses Projekt verwendet [Conventional Commits](https://www.conventionalcommits.org/) für automatische Versionierung und Changelog-Generierung.
 
-### Installation
+### Commit-Template einrichten
 
 ```bash
-# macOS
-brew install act
-
-# Linux
-curl -sSf https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
-
-# Windows
-choco install act-cli
+make setup-git
 ```
 
-### Verwendung
+### Commit-Typen
+
+| Type | Beschreibung | Version-Bump |
+|------|--------------|--------------|
+| `feat` | Neues Feature | Minor |
+| `fix` | Bug-Fix | Patch |
+| `docs` | Dokumentation | - |
+| `style` | Formatierung | - |
+| `refactor` | Refactoring | - |
+| `perf` | Performance | Patch |
+| `test` | Tests | - |
+| `ci` | CI/CD | - |
+| `chore` | Wartung | - |
+
+### Beispiele
 
 ```bash
-# Lint-Job lokal testen
-make act-test
-
-# Debug-Workflow ausführen
-make act-debug
-
-# Alle Workflows/Jobs auflisten
-make act-list
-
-# Mit Secrets (Datei aus .secrets.example kopieren)
-cp .secrets.example .secrets
-# Werte eintragen, dann:
-act push --secret-file .secrets
+git commit -m "feat: add badge color customization"
+git commit -m "fix(cli): handle empty input"
+git commit -m "feat!: redesign API"  # Breaking Change
 ```
 
 ## CI/CD Workflows
 
-| Workflow | Zweck | Caching |
-|----------|-------|---------|
-| `ci.yml` | Lint, Test, Build | ✅ pip cache |
-| `debug.yml` | Context-Dump, System-Info | - |
-| `cache-demo.yml` | Caching-Mechanismen Demo | ✅ |
-| `multi-platform.yml` | Matrix-Testing | ✅ pip cache |
-| `security.yml` | Security-Scans | - |
-| `pages.yml` | GitHub Pages | - |
-| `deploy.yml` | PyPI Deployment | - |
+| Workflow | Trigger | Zweck |
+|----------|---------|-------|
+| `ci.yml` | Push, PR | Lint, Tests |
+| `auto-format.yml` | Push, PR | Code automatisch formatieren |
+| `release.yml` | Push to main | Version bump, Changelog, GitHub Release |
+| `debug.yml` | Manual | Debugging |
+| `pages.yml` | Push to main | GitHub Pages |
+| `deploy.yml` | Tags | PyPI Deployment |
 
-## Performance-Optimierungen
+## Releases
 
-Der CI-Workflow nutzt folgende Optimierungen:
+Releases werden automatisch erstellt wenn:
+1. Commits mit `feat:`, `fix:`, `perf:` oder Breaking Changes auf `main` gepusht werden
+2. Tests erfolgreich durchlaufen
+3. `conventional-changelog-action` eine neue Version berechnet
 
-1. **Caching**: `setup-python` mit `cache: 'pip'`
-2. **Concurrency**: Alte Runs werden bei neuem Push abgebrochen
-3. **Parallele Jobs**: `lint` und `test` laufen gleichzeitig
-4. **Optimierte Matrix**: Windows/macOS nur mit neuester Python-Version
-5. **Selektive Steps**: Coverage nur für Ubuntu+Python 3.12
+Der Release-Prozess:
+1. Version in `pyproject.toml` aktualisieren
+2. `CHANGELOG.md` generieren
+3. Git-Tag erstellen
+4. GitHub Release mit Artefakten erstellen
+
+## Changelog
+
+Siehe [CHANGELOG.md](CHANGELOG.md) für alle Änderungen.

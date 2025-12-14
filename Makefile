@@ -1,4 +1,4 @@
-.PHONY: install test lint type-check build clean act-test act-debug
+.PHONY: install test lint type-check format build clean act-test act-debug release-dry-run
 
 # Development setup
 install:
@@ -21,6 +21,15 @@ lint-fix:
 type-check:
 	mypy src/
 
+# Formatting
+format:
+	black src/ tests/
+	ruff check --fix src/ tests/
+
+format-check:
+	black --check src/ tests/
+	ruff check src/ tests/
+
 # Build
 build:
 	python -m build
@@ -35,8 +44,11 @@ clean:
 # Local workflow testing with act
 act-test:
 	@echo "Running CI workflow locally with act..."
-	@echo "Note: First run may download runner image (~500MB)"
 	act push -j lint
+
+act-format:
+	@echo "Running auto-format workflow locally..."
+	act push -W .github/workflows/auto-format.yml
 
 act-debug:
 	@echo "Running debug workflow locally..."
@@ -46,17 +58,36 @@ act-list:
 	@echo "Available workflows and jobs:"
 	act -l
 
+# Release
+release-dry-run:
+	@echo "Simulating release (no actual changes)..."
+	@echo "Would analyze commits since last tag and calculate next version."
+	@echo ""
+	@echo "Recent commits:"
+	@git log --oneline -10
+
+# Git setup
+setup-git:
+	@echo "Setting up git commit template..."
+	git config commit.template .gitmessage
+	@echo "Done. Your commits will now show the conventional commit template."
+
 # Help
 help:
 	@echo "Available targets:"
-	@echo "  install     - Install package with dev dependencies"
-	@echo "  test        - Run tests"
-	@echo "  test-cov    - Run tests with coverage"
-	@echo "  lint        - Run linter"
-	@echo "  lint-fix    - Run linter with auto-fix"
-	@echo "  type-check  - Run type checker"
-	@echo "  build       - Build package"
-	@echo "  clean       - Remove build artifacts"
-	@echo "  act-test    - Test lint job locally with act"
-	@echo "  act-debug   - Run debug workflow locally"
-	@echo "  act-list    - List all workflows and jobs"
+	@echo "  install        - Install package with dev dependencies"
+	@echo "  test           - Run tests"
+	@echo "  test-cov       - Run tests with coverage"
+	@echo "  lint           - Run linter"
+	@echo "  lint-fix       - Run linter with auto-fix"
+	@echo "  type-check     - Run type checker"
+	@echo "  format         - Format code with black and ruff"
+	@echo "  format-check   - Check code formatting"
+	@echo "  build          - Build package"
+	@echo "  clean          - Remove build artifacts"
+	@echo "  act-test       - Test lint job locally with act"
+	@echo "  act-format     - Test auto-format workflow locally"
+	@echo "  act-debug      - Run debug workflow locally"
+	@echo "  act-list       - List all workflows and jobs"
+	@echo "  release-dry-run- Show what release would do"
+	@echo "  setup-git      - Configure git commit template"
