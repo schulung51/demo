@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badge-gen"
-version = "0.2.0"
+version = "0.3.0"
 description = "Simple badge generator used as GitHub Actions training project"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,6 +20,7 @@ dev = [
     "pytest-cov>=4.1",
     "ruff>=0.1.0",
     "mypy>=1.5",
+    "build>=1.0",
 ]
 
 [project.scripts]

@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+# Workflow-Level: Minimale Permissions für alle Jobs
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Linting
     runs-on: ubuntu-latest
+    # Job erbt permissions vom Workflow-Level
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -50,8 +55,3 @@ jobs:
 
       - name: Run tests
         run: pytest tests/ -v
-
-      - name: Notify on failure
-        if: failure()
-        run: |
-          echo "::warning::Tests failed! Check the logs for details."

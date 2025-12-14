@@ -1,2 +1,3 @@
 .venv
 badge_gen.egg-info/
+__pycache__
