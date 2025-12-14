@@ -1,14 +1,57 @@
-## [0.7.0](https://github.com/schulung51/demo/compare/v0.6.0...v0.7.0) (2025-12-14)
+# Changelog
 
+All notable changes to this project will be documented in this file.
 
-### Features
+## [0.7.0] - 2025-01-20
 
-* add composite actions and reusable workflows ([db3aa5b](https://github.com/schulung51/demo/commit/db3aa5b530b1221038c89f934d61bce609aef962))
+### Added
+- Badge creation CLI with SVG output
+- GitHub Pages deployment workflow
+- PyPI publishing with Trusted Publishing (OIDC)
+- TestPyPI integration for pre-release testing
+- Complete release workflow with test matrix
+- Environment-based deployment protection
 
-## [0.6.0](https://github.com/schulung51/demo/compare/3e6ad19aa458c7ecbcb43aa0ec2e78249145f6d2...v0.6.0) (2025-12-14)
+### Changed
+- Enhanced CLI with `create` subcommand
+- Updated release workflow with GitHub Releases environment
+- Improved SETUP_GUIDE with deployment instructions
 
+## [0.6.0] - 2025-01-15
 
-### Features
+### Added
+- Composite Actions for reusable CI components
+- Reusable workflow `ci-reusable.yml`
+- SHA-pinning for all third-party actions
+- Dependabot configuration
 
-* add repository automation and release workflow ([3e6ad19](https://github.com/schulung51/demo/commit/3e6ad19aa458c7ecbcb43aa0ec2e78249145f6d2))
+## [0.5.0] - 2025-01-01
 
+### Added
+- Repository automation with auto-format workflow
+- Conventional commits support
+- Automated changelog generation
+
+## [0.4.0] - 2024-12-15
+
+### Added
+- Caching for pip dependencies
+- Debug workflow for troubleshooting
+- Local testing support with act
+
+## [0.3.0] - 2024-12-01
+
+### Added
+- GitHub Pages deployment workflow
+- Environment-based deployments
+
+## [0.2.0] - 2024-11-15
+
+### Added
+- Multi-platform CI
+- Matrix testing
+
+## [0.1.0] - 2024-11-01
+
+### Added
+- Initial project setup

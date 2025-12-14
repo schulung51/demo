@@ -1,83 +1,89 @@
 # badge-gen
 
-Minimaler Beispiel-CLI für eine GitHub-Actions-Schulung.
+A simple badge generator for GitHub repositories - used as a GitHub Actions training project.
 
-## Zweck
+## Features
 
-Dieses Repository demonstriert GitHub Actions Konzepte:
-- Kapitel 1: Event-Modell, Runner, Workflow-Syntax
-- Kapitel 2: Jobs, Matrix-Strategien, Failure-Handling
-- Kapitel 3: Secrets, Variables, Permissions, Environments
-- Kapitel 4: Caching, Debugging, Performance-Optimierung
-- Kapitel 5: Repository-Automatisierung, Releases, Conventional Commits
-- Kapitel 6: Actions-Ökosystem, Composite Actions, Reusable Workflows
+- Generate SVG badges with customizable labels, values, and colors
+- GitHub Pages deployment with automatic badge gallery
+- PyPI publishing with Trusted Publishing (OIDC)
+- Comprehensive CI/CD pipeline
 
-## Lokale Entwicklung
+## Installation
 
 ```bash
-make install    # Dependencies installieren
-make test       # Tests ausführen
-make lint       # Linting
-make format     # Code formatieren
-make build      # Package bauen
+pip install badge-gen
 ```
 
-## Custom Actions
+## Usage
 
-Dieses Repository enthält wiederverwendbare Composite Actions:
+### Create a badge
 
-| Action | Beschreibung |
-|--------|--------------|
-| `setup-python-env` | Python Setup mit Caching |
-| `quality-checks` | Linting, Type-Checking, Formatting |
-| `run-tests` | Tests mit Coverage |
+```bash
+# Output to stdout
+badge-gen create --name "build" --value "passing" --color green
 
-**Verwendung:**
-```yaml
-steps:
-  - uses: ./.github/actions/setup-python-env
-    with:
-      python-version: '3.12'
+# Save to file
+badge-gen create -n "coverage" -v "87%" -c yellow -o badge.svg
 ```
 
-Siehe [docs/ACTIONS.md](docs/ACTIONS.md) für Details.
+### Available colors
 
-## Reusable Workflows
+- `green` - Success, passing
+- `yellow` - Warning, partial
+- `red` - Error, failing
+- `blue` - Info, default
+- `gray` - Inactive, unknown
+- `orange` - Important, attention
 
-Der `ci-reusable.yml` Workflow kann von anderen Repositories aufgerufen werden:
+## GitHub Actions Training
 
-```yaml
-jobs:
-  ci:
-    uses: owner/repo/.github/workflows/ci-reusable.yml@v1
-    with:
-      python-version: '3.12'
-      run-lint: true
-```
+This repository demonstrates:
 
-## Security
-
-### SHA-Pinning
-
-Alle Third-Party Actions sind auf Commit-SHAs gepinnt:
-
-```yaml
-uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
-```
-
-### Dependabot
-
-Automatische Updates für:
-- GitHub Actions (wöchentlich)
-- Python Dependencies (wöchentlich)
-
-Siehe [SECURITY.md](SECURITY.md) für Details.
+| Chapter | Topic |
+|---------|-------|
+| 1 | Event-Modell, Runner, Workflow-Syntax |
+| 2 | Jobs, Matrix-Strategien, Failure-Handling |
+| 3 | Secrets, Variables, Permissions, Environments |
+| 4 | Caching, Debugging, Performance-Optimierung |
+| 5 | Repository-Automatisierung, Conventional Commits |
+| 6 | Actions-Ökosystem, Composite Actions, Reusable Workflows |
+| 7 | Deployment-Strategien, GitHub Pages, PyPI Publishing |
 
 ## Workflows
 
-| Workflow | Trigger | Beschreibung |
-|----------|---------|--------------|
-| `ci.yml` | Push, PR | CI mit Composite Actions |
-| `ci-reusable.yml` | workflow_call | Reusable CI Workflow |
-| `release.yml` | Push to main | Automatische Releases |
-| `auto-format.yml` | Push, PR | Code-Formatierung |
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| `ci.yml` | Push, PR | Lint, test with matrix |
+| `release.yml` | Push to main | Automatic versioning and release |
+| `deploy-pages.yml` | Push to main | Deploy badge gallery to GitHub Pages |
+| `publish-pypi.yml` | Release published | Publish to PyPI via OIDC |
+
+## Environments
+
+| Environment | Purpose | Protection |
+|-------------|---------|------------|
+| `github-pages` | GitHub Pages | Auto |
+| `github-releases` | GitHub Releases | Optional |
+| `testpypi` | TestPyPI Publishing | Branch: main |
+| `pypi` | PyPI Publishing | Branch: main, Reviewer |
+
+## Development
+
+```bash
+# Install with dev dependencies
+make install
+
+# Run tests
+make test
+
+# Format code
+make format
+
+# Build package
+make build
+```
+
+## License
+
+MIT
