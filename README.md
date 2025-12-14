@@ -10,83 +10,74 @@ Dieses Repository demonstriert GitHub Actions Konzepte:
 - Kapitel 3: Secrets, Variables, Permissions, Environments
 - Kapitel 4: Caching, Debugging, Performance-Optimierung
 - Kapitel 5: Repository-Automatisierung, Releases, Conventional Commits
+- Kapitel 6: Actions-Ökosystem, Composite Actions, Reusable Workflows
 
 ## Lokale Entwicklung
 
 ```bash
-# Installation mit Dev-Dependencies
-make install
-
-# Code formatieren
-make format
-
-# Tests ausführen
-make test
-
-# Code-Qualität prüfen
-make lint
-make type-check
-
-# Package bauen
-make build
+make install    # Dependencies installieren
+make test       # Tests ausführen
+make lint       # Linting
+make format     # Code formatieren
+make build      # Package bauen
 ```
 
-## Conventional Commits
+## Custom Actions
 
-Dieses Projekt verwendet [Conventional Commits](https://www.conventionalcommits.org/) für automatische Versionierung und Changelog-Generierung.
+Dieses Repository enthält wiederverwendbare Composite Actions:
 
-### Commit-Template einrichten
+| Action | Beschreibung |
+|--------|--------------|
+| `setup-python-env` | Python Setup mit Caching |
+| `quality-checks` | Linting, Type-Checking, Formatting |
+| `run-tests` | Tests mit Coverage |
 
-```bash
-make setup-git
+**Verwendung:**
+```yaml
+steps:
+  - uses: ./.github/actions/setup-python-env
+    with:
+      python-version: '3.12'
 ```
 
-### Commit-Typen
+Siehe [docs/ACTIONS.md](docs/ACTIONS.md) für Details.
 
-| Type | Beschreibung | Version-Bump |
-|------|--------------|--------------|
-| `feat` | Neues Feature | Minor |
-| `fix` | Bug-Fix | Patch |
-| `docs` | Dokumentation | - |
-| `style` | Formatierung | - |
-| `refactor` | Refactoring | - |
-| `perf` | Performance | Patch |
-| `test` | Tests | - |
-| `ci` | CI/CD | - |
-| `chore` | Wartung | - |
+## Reusable Workflows
 
-### Beispiele
+Der `ci-reusable.yml` Workflow kann von anderen Repositories aufgerufen werden:
 
-```bash
-git commit -m "feat: add badge color customization"
-git commit -m "fix(cli): handle empty input"
-git commit -m "feat!: redesign API"  # Breaking Change
+```yaml
+jobs:
+  ci:
+    uses: owner/repo/.github/workflows/ci-reusable.yml@v1
+    with:
+      python-version: '3.12'
+      run-lint: true
 ```
 
-## CI/CD Workflows
+## Security
 
-| Workflow | Trigger | Zweck |
-|----------|---------|-------|
-| `ci.yml` | Push, PR | Lint, Tests |
-| `auto-format.yml` | Push, PR | Code automatisch formatieren |
-| `release.yml` | Push to main | Version bump, Changelog, GitHub Release |
-| `debug.yml` | Manual | Debugging |
-| `pages.yml` | Push to main | GitHub Pages |
-| `deploy.yml` | Tags | PyPI Deployment |
+### SHA-Pinning
 
-## Releases
+Alle Third-Party Actions sind auf Commit-SHAs gepinnt:
 
-Releases werden automatisch erstellt wenn:
-1. Commits mit `feat:`, `fix:`, `perf:` oder Breaking Changes auf `main` gepusht werden
-2. Tests erfolgreich durchlaufen
-3. `conventional-changelog-action` eine neue Version berechnet
+```yaml
+uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+```
 
-Der Release-Prozess:
-1. Version in `pyproject.toml` aktualisieren
-2. `CHANGELOG.md` generieren
-3. Git-Tag erstellen
-4. GitHub Release mit Artefakten erstellen
+### Dependabot
 
-## Changelog
+Automatische Updates für:
+- GitHub Actions (wöchentlich)
+- Python Dependencies (wöchentlich)
 
-Siehe [CHANGELOG.md](CHANGELOG.md) für alle Änderungen.
+Siehe [SECURITY.md](SECURITY.md) für Details.
+
+## Workflows
+
+| Workflow | Trigger | Beschreibung |
+|----------|---------|--------------|
+| `ci.yml` | Push, PR | CI mit Composite Actions |
+| `ci-reusable.yml` | workflow_call | Reusable CI Workflow |
+| `release.yml` | Push to main | Automatische Releases |
+| `auto-format.yml` | Push, PR | Code-Formatierung |
