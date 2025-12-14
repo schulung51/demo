@@ -46,7 +46,7 @@ jobs:
             echo "changes=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v7
         if: steps.git-check.outputs.changes == 'true'
         with:
           commit_message: "style: auto-format with black and ruff"
