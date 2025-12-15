@@ -1,0 +1,47 @@
+name: Configuration Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  show-config:
+    name: Show Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Display configuration
+        env:
+          # Variables (nicht sensitiv, in UI sichtbar)
+          # Diese müssen in Settings > Secrets and Variables > Actions > Variables angelegt werden
+          API_URL: ${{ vars.API_URL }}
+          LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+          # Secrets (sensitiv, maskiert)
+          # Diese müssen in Settings > Secrets and Variables > Actions > Secrets angelegt werden
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          echo "=== Configuration for ${{ inputs.environment }} ==="
+          echo "API URL: ${API_URL:-'(not set - add vars.API_URL)'}"
+          echo "Log Level: ${LOG_LEVEL:-'(not set - add vars.LOG_LEVEL)'}"
+          echo "API Key: ${API_KEY:+'***configured***'}"
+          echo "API Key: ${API_KEY:-'(not set - add secrets.API_KEY)'}"
+
+      - name: Check GITHUB_TOKEN permissions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "=== GITHUB_TOKEN Scopes ==="
+          # Zeigt die verfügbaren Scopes des automatischen Tokens
+          curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }} \
+            -I 2>/dev/null | grep -i "x-oauth-scopes" || echo "Token has fine-grained permissions"

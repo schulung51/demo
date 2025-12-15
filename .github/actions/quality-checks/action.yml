@@ -1,0 +1,60 @@
+name: 'Run Quality Checks'
+description: 'Run linting, type checking, and formatting checks'
+author: 'badge-gen training project'
+
+inputs:
+  run-lint:
+    description: 'Run ruff linter'
+    required: false
+    default: 'true'
+  run-typecheck:
+    description: 'Run mypy type checker'
+    required: false
+    default: 'true'
+  run-format-check:
+    description: 'Check code formatting with black'
+    required: false
+    default: 'true'
+  source-dir:
+    description: 'Source directory to check'
+    required: false
+    default: 'src/'
+  test-dir:
+    description: 'Test directory to check'
+    required: false
+    default: 'tests/'
+
+outputs:
+  lint-result:
+    description: 'Lint check result (passed/failed)'
+    value: ${{ steps.lint.outcome }}
+  typecheck-result:
+    description: 'Type check result (passed/failed)'
+    value: ${{ steps.typecheck.outcome }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Check formatting with Black
+      id: format
+      if: inputs.run-format-check == 'true'
+      shell: bash
+      run: |
+        echo "Checking code formatting..."
+        black --check ${{ inputs.source-dir }} ${{ inputs.test-dir }}
+
+    - name: Lint with Ruff
+      id: lint
+      if: inputs.run-lint == 'true'
+      shell: bash
+      run: |
+        echo "Running ruff linter..."
+        ruff check ${{ inputs.source-dir }} ${{ inputs.test-dir }}
+
+    - name: Type check with mypy
+      id: typecheck
+      if: inputs.run-typecheck == 'true'
+      shell: bash
+      run: |
+        echo "Running mypy type checker..."
+        mypy ${{ inputs.source-dir }}

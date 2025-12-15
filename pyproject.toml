@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badge-gen"
-version = "0.1.0"
+version = "0.7.0"
 description = "Simple badge generator used as GitHub Actions training project"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,6 +14,17 @@ authors = [
 
 dependencies = []
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.1.0",
+    "mypy>=1.5",
+    "build>=1.0",
+    "black>=24.0",
+    "bandit>=1.7",
+]
+
 [project.scripts]
 badge-gen = "badge_gen.cli:main"
 
@@ -22,6 +33,24 @@ line-length = 88
 target-version = "py310"
 select = ["E", "F", "I"]
 
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+
 [tool.mypy]
 python_version = "3.10"
 strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]

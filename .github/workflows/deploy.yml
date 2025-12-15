@@ -1,0 +1,107 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main, develop]
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Install project
+        run: pip install -e .
+
+      - name: Get version
+        id: get-version
+        run: |
+          VERSION=$(python -c "import badge_gen; print(badge_gen.__version__)")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build package
+        run: python -m build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+    permissions:
+      id-token: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Display build info
+        run: |
+          echo "Deploying version ${{ needs.build.outputs.version }} to staging"
+          ls -la dist/
+
+      # Hinweis: Für echtes PyPI-Publishing:
+      # - uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     repository-url: https://test.pypi.org/legacy/
+      - name: Simulate staging deployment
+        run: |
+          echo "::notice::Would publish to Test PyPI"
+          echo "Packages:"
+          ls dist/*.whl dist/*.tar.gz
+
+  deploy-production:
+    name: Deploy to Production
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Display build info
+        run: |
+          echo "Deploying version ${{ needs.build.outputs.version }} to production"
+          ls -la dist/
+
+      # Hinweis: Für echtes PyPI-Publishing:
+      # - uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Simulate production deployment
+        run: |
+          echo "::notice::Would publish to PyPI"
+          echo "Packages:"
+          ls dist/*.whl dist/*.tar.gz

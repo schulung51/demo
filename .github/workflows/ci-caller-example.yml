@@ -1,0 +1,32 @@
+# Beispiel: Aufruf eines Reusable Workflows
+# Dieses Beispiel zeigt, wie man den ci-reusable.yml Workflow aufruft
+#
+# In einem echten Setup würde der Reusable Workflow in einem
+# zentralen Repository liegen, z.B.:
+#   uses: my-org/shared-workflows/.github/workflows/ci-python.yml@v1
+
+name: CI (via Reusable Workflow)
+
+on:
+  workflow_dispatch:  # Nur manuell, um Duplikation zu vermeiden
+
+jobs:
+  # Aufruf des lokalen Reusable Workflows
+  ci:
+    uses: ./.github/workflows/ci-reusable.yml
+    with:
+      python-version: '3.12'
+      run-lint: true
+      run-security: true
+      coverage-threshold: 50
+    secrets:
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+
+  # Job der auf den Reusable Workflow wartet
+  report:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report coverage
+        run: |
+          echo "Test coverage: ${{ needs.ci.outputs.coverage }}%"

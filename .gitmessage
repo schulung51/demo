@@ -1,0 +1,28 @@
+# <type>(<scope>): <subject>
+#
+# Types:
+#   feat:     A new feature (triggers MINOR version bump)
+#   fix:      A bug fix (triggers PATCH version bump)
+#   docs:     Documentation only changes
+#   style:    Code style changes (formatting, semicolons, etc)
+#   refactor: Code change that neither fixes a bug nor adds a feature
+#   perf:     Performance improvement
+#   test:     Adding or correcting tests
+#   build:    Changes to build system or dependencies
+#   ci:       Changes to CI configuration
+#   chore:    Other changes that don't modify src or test files
+#   revert:   Reverts a previous commit
+#
+# Scope: Optional, e.g., (api), (cli), (core)
+#
+# Breaking Changes:
+#   Add ! after type: feat!: breaking change
+#   Or add BREAKING CHANGE: in footer
+#
+# Examples:
+#   feat: add SVG export functionality
+#   fix(cli): handle missing config file
+#   feat!: redesign API interface
+#   docs: update installation guide
+#
+
