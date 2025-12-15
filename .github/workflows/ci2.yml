@@ -21,3 +21,30 @@ jobs:
           cat hello.txt
           echo $HELLO
 
+  data2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: step1
+        run: |
+          echo "hello" > hello.txt
+
+      - name: step2
+        run: |
+          cat hello.txt
+          echo $HELLO
+
+  data3:
+    runs-on: ubuntu-latest
+    needs: data
+
+    steps:
+      - name: step1
+        run: |
+          echo "hello" > hello.txt
+
+      - name: step2
+        run: |
+          cat hello.txt
+          echo $HELLO
+
