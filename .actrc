@@ -1,0 +1,13 @@
+# act configuration file
+# See: https://github.com/nektos/act
+
+# Default platform mapping (Medium image - good balance)
+-P ubuntu-latest=ghcr.io/catthehacker/ubuntu:act-latest
+-P ubuntu-22.04=ghcr.io/catthehacker/ubuntu:act-22.04
+-P ubuntu-20.04=ghcr.io/catthehacker/ubuntu:act-20.04
+
+# For full GitHub compatibility (Large image - 18GB!), uncomment:
+# -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:full-latest
+
+# Default event
+--defaultbranch main

@@ -1,0 +1,61 @@
+name: 'Run Tests'
+description: 'Run pytest with coverage reporting'
+author: 'badge-gen training project'
+
+inputs:
+  coverage-threshold:
+    description: 'Minimum coverage percentage required'
+    required: false
+    default: '0'
+  test-dir:
+    description: 'Test directory'
+    required: false
+    default: 'tests/'
+  coverage-report:
+    description: 'Generate coverage report (xml/html/term)'
+    required: false
+    default: 'xml'
+
+outputs:
+  coverage:
+    description: 'Coverage percentage'
+    value: ${{ steps.coverage.outputs.percentage }}
+  test-result:
+    description: 'Test result (passed/failed)'
+    value: ${{ steps.test.outcome }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run tests with coverage
+      id: test
+      shell: bash
+      run: |
+        echo "Running pytest with coverage..."
+        pytest ${{ inputs.test-dir }} -v --cov=src --cov-report=${{ inputs.coverage-report }} --cov-report=term
+
+    - name: Extract coverage percentage
+      id: coverage
+      shell: bash
+      run: |
+        if [[ -f "coverage.xml" ]]; then
+          COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(int(float(ET.parse('coverage.xml').getroot().get('line-rate', 0)) * 100))")
+          echo "Coverage: ${COVERAGE}%"
+          echo "percentage=$COVERAGE" >> $GITHUB_OUTPUT
+        else
+          echo "No coverage.xml found"
+          echo "percentage=0" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check coverage threshold
+      if: inputs.coverage-threshold != '0'
+      shell: bash
+      run: |
+        THRESHOLD=${{ inputs.coverage-threshold }}
+        COVERAGE=${{ steps.coverage.outputs.percentage }}
+        if [[ $COVERAGE -lt $THRESHOLD ]]; then
+          echo "::error::Coverage ${COVERAGE}% is below threshold ${THRESHOLD}%"
+          exit 1
+        else
+          echo "Coverage ${COVERAGE}% meets threshold ${THRESHOLD}%"
+        fi
