@@ -1,0 +1,23 @@
+name: CI2
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: step1
+        run: |
+          echo "hello" > hello.txt
+          export HELLO="WORLD"
+
+      - name: step2
+        run: |
+          cat hello.txt
+          echo $HELLO
+
