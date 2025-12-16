@@ -21,7 +21,7 @@ jobs:
     if: starts-with(github.ref_name, '^feature')
     runs-on: ubuntu-latest
     steps:
-      - name read environment
+      - name: read environment
       - run: |
-        echo "Ich bin ein Feature-Branch"
+          echo "Ich bin ein Feature-Branch"
 
