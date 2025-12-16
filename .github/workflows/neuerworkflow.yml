@@ -18,7 +18,7 @@ permissions:
 jobs:
   show-env:
     name: Show Env if starts with feature
-    if: starts-with(github.ref_name, '^feature')
+    if: startsWith(github.ref_name, '^feature')
     runs-on: ubuntu-latest
     steps:
       - name: read environment
