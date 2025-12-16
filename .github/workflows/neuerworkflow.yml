@@ -19,7 +19,7 @@ jobs:
   show-env:
     name: Show Env if starts with feature
     if: startsWith(github.ref_name, 'feature')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: read environment
         run: |
@@ -27,7 +27,7 @@ jobs:
 
   show-always:
     name: Show always
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: read environment
         run: |
