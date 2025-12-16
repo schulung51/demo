@@ -25,3 +25,11 @@ jobs:
         run: |
           echo "Ich bin ein Feature-Branch"
 
+  show-always:
+    name: Show always
+    runs-on: ubuntu-latest
+    steps:
+      - name: read environment
+        run: |
+          echo "Ich bin immer da"
+
