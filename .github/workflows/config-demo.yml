@@ -3,7 +3,7 @@ name: Configuration Demo
 on:
   workflow_dispatch:
     inputs:
-      environment:
+      environment2:
         description: 'Target environment'
         required: true
         type: choice
