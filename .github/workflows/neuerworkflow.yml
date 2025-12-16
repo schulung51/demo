@@ -22,6 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: read environment
-      - run: |
+        run: |
           echo "Ich bin ein Feature-Branch"
 
