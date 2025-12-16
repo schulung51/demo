@@ -1,0 +1,27 @@
+name: Only in feature branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+permissions:
+  contents: read
+
+jobs:
+  show-env:
+    name: Show Env if starts with feature
+    if: starts-with(github.ref_name, '^feature')
+    runs-on: ubuntu-latest
+    steps:
+      - name read environment
+      - run: |
+        echo "Ich bin ein Feature-Branch"
+
