@@ -1,0 +1,108 @@
+name: Debug Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_level:
+        description: 'Debug level'
+        required: true
+        type: choice
+        options:
+          - minimal
+          - verbose
+          - full
+        default: 'verbose'
+      dump_contexts:
+        description: 'Dump all contexts'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  debug:
+    name: Debug Information
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Basic Debug Info
+        run: |
+          echo "=== Basic Debug Info ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Run Number: ${{ github.run_number }}"
+
+      - name: Runner Info
+        run: |
+          echo "=== Runner Info ==="
+          echo "OS: ${{ runner.os }}"
+          echo "Arch: ${{ runner.arch }}"
+          echo "Temp: ${{ runner.temp }}"
+          echo "Tool Cache: ${{ runner.tool_cache }}"
+          echo ""
+          echo "=== System Info ==="
+          uname -a
+          echo ""
+          echo "=== Disk Space ==="
+          df -h
+          echo ""
+          echo "=== Memory ==="
+          free -h
+
+      - name: Environment Variables
+        if: inputs.debug_level == 'verbose' || inputs.debug_level == 'full'
+        run: |
+          echo "=== Environment Variables ==="
+          env | sort | grep -E "^(GITHUB_|RUNNER_|CI)" || true
+
+      - name: Dump GitHub Context
+        if: inputs.dump_contexts
+        run: |
+          echo "=== GitHub Context ==="
+          echo '${{ toJSON(github) }}'
+
+      - name: Dump Runner Context
+        if: inputs.dump_contexts
+        run: |
+          echo "=== Runner Context ==="
+          echo '${{ toJSON(runner) }}'
+
+      - name: Dump Env Context
+        if: inputs.dump_contexts && (inputs.debug_level == 'verbose' || inputs.debug_level == 'full')
+        run: |
+          echo "=== Env Context ==="
+          echo '${{ toJSON(env) }}'
+
+      - name: Dump Secrets Context (Keys only)
+        if: inputs.debug_level == 'full'
+        run: |
+          echo "=== Secrets Context (available keys) ==="
+          echo "Note: Values are never shown, only checking if secrets exist"
+          echo "GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN != '' }}"
+
+      - name: Cache Debug
+        if: inputs.debug_level == 'full'
+        run: |
+          echo "=== Cache Locations ==="
+          echo "pip cache: ~/.cache/pip"
+          ls -la ~/.cache/pip 2>/dev/null || echo "(not cached yet)"
+          echo ""
+          echo "npm cache: ~/.npm"
+          ls -la ~/.npm 2>/dev/null || echo "(not cached yet)"
+
+      - name: Python Environment
+        run: |
+          echo "=== Python Environment ==="
+          which python || echo "Python not in PATH"
+          python --version 2>/dev/null || echo "Python not available"
+          pip --version 2>/dev/null || echo "pip not available"
+          echo ""
+          echo "=== Installed packages ==="
+          pip list 2>/dev/null | head -20 || echo "Cannot list packages"

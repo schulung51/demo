@@ -1,0 +1,142 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no actual release)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ matrix.python-version }}
+          install-dev: 'true'
+
+      - name: Run tests
+        uses: ./.github/actions/run-tests
+        with:
+          coverage-threshold: '0'
+
+  release:
+    name: Create Release
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.changelog.outputs.version }}
+      tag: ${{ steps.changelog.outputs.tag }}
+      skipped: ${{ steps.changelog.outputs.skipped }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ github.token }}
+          output-file: "CHANGELOG.md"
+          skip-version-file: false
+          version-file: "pyproject.toml"
+          version-path: "project.version"
+          git-message: "chore(release): {version} [skip ci]"
+          tag-prefix: "v"
+          preset: "conventionalcommits"
+          skip-commit: ${{ inputs.dry_run || false }}
+          skip-tag: ${{ inputs.dry_run || false }}
+
+      - name: Show release info
+        if: steps.changelog.outputs.skipped == 'false'
+        run: |
+          echo "=== Release Info ==="
+          echo "Version: ${{ steps.changelog.outputs.version }}"
+          echo "Tag: ${{ steps.changelog.outputs.tag }}"
+
+  build:
+    name: Build Package
+    needs: release
+    if: needs.release.outputs.skipped == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+
+      - name: Setup Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c  # v5.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install build tools
+        run: pip install build
+
+      - name: Build package
+        run: python -m build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3  # v4.3.1
+        with:
+          name: dist
+          path: dist/
+
+  github-release:
+    name: Create GitHub Release
+    needs: [release, build]
+    if: needs.release.outputs.skipped == 'false'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-releases
+      url: https://github.com/${{ github.repository }}/releases/tag/${{ needs.release.outputs.tag }}
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131  # v7.0.0
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5  # v1.14.0
+        with:
+          token: ${{ github.token }}
+          tag: ${{ needs.release.outputs.tag }}
+          name: Release ${{ needs.release.outputs.tag }}
+          body: |
+            ## What's Changed
+
+            See [CHANGELOG.md](CHANGELOG.md) for details.
+
+            ## Installation
+
+            ```bash
+            pip install badge-gen==${{ needs.release.outputs.version }}
+            ```
+          artifacts: "dist/*"
+          draft: false
+          prerelease: false
