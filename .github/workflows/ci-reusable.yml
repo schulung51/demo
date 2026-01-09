@@ -1,0 +1,108 @@
+# Reusable CI Workflow für Python-Projekte
+# Kann von anderen Repositories aufgerufen werden
+name: Python CI (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version to use'
+        type: string
+        default: '3.12'
+      os:
+        description: 'Runner OS'
+        type: string
+        default: 'ubuntu-latest'
+      run-lint:
+        description: 'Run linting checks'
+        type: boolean
+        default: true
+      run-security:
+        description: 'Run security checks'
+        type: boolean
+        default: false
+      coverage-threshold:
+        description: 'Minimum coverage percentage'
+        type: number
+        default: 0
+    secrets:
+      codecov-token:
+        description: 'Codecov upload token'
+        required: false
+    outputs:
+      coverage:
+        description: 'Test coverage percentage'
+        value: ${{ jobs.test.outputs.coverage }}
+
+jobs:
+  lint:
+    name: Lint
+    if: ${{ inputs.run-lint }}
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ inputs.python-version }}
+          install-dev: 'true'
+
+      - name: Run quality checks
+        uses: ./.github/actions/quality-checks
+        with:
+          run-lint: 'true'
+          run-typecheck: 'true'
+          run-format-check: 'true'
+
+  security:
+    name: Security
+    if: ${{ inputs.run-security }}
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+
+      - name: Setup Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c  # v5.0.0
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: Install security tools
+        run: pip install bandit pip-audit
+
+      - name: Run Bandit
+        run: bandit -r src/ -ll || true
+
+      - name: Run pip-audit
+        run: pip-audit || true
+
+  test:
+    name: Test
+    runs-on: ${{ inputs.os }}
+    outputs:
+      coverage: ${{ steps.test.outputs.coverage }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+
+      - name: Setup Python environment
+        uses: ./.github/actions/setup-python-env
+        with:
+          python-version: ${{ inputs.python-version }}
+          install-dev: 'true'
+
+      - name: Run tests
+        id: test
+        uses: ./.github/actions/run-tests
+        with:
+          coverage-threshold: ${{ inputs.coverage-threshold }}
+          coverage-report: 'xml'
+
+      - name: Upload coverage to Codecov
+        if: ${{ secrets.codecov-token != '' }}
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de  # v4.0.1
+        with:
+          token: ${{ secrets.codecov-token }}
+          file: coverage.xml

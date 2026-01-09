@@ -1,4 +1,5 @@
 """Tests for the badge-gen CLI."""
+
 import subprocess
 import sys
 

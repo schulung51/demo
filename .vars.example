@@ -1,0 +1,8 @@
+# Example variables file for act
+# Copy to .vars for local testing
+#
+# Usage: act --var-file .vars
+
+API_URL=http://localhost:8080
+LOG_LEVEL=debug
+ENVIRONMENT=local
