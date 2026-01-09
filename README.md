@@ -1,73 +1,89 @@
 # badge-gen
 
-Minimaler Beispiel-CLI für eine GitHub-Actions-Schulung.
+A simple badge generator for GitHub repositories - used as a GitHub Actions training project.
 
-## Zweck
+## Features
 
-Dieses Repository demonstriert GitHub Actions Konzepte:
-- Kapitel 1: Event-Modell, Runner, Workflow-Syntax
-- Kapitel 2: Jobs, Matrix-Strategien, Failure-Handling
-- Kapitel 3: Secrets, Variables, Permissions, Environments
+- Generate SVG badges with customizable labels, values, and colors
+- GitHub Pages deployment with automatic badge gallery
+- PyPI publishing with Trusted Publishing (OIDC)
+- Comprehensive CI/CD pipeline
 
-## Lokale Entwicklung
+## Installation
 
 ```bash
-# Installation mit Dev-Dependencies
-pip install -e .[dev]
-
-# CLI ausführen
-badge-gen --repo octocat/Hello-World
-
-# Tests ausführen
-pytest
-
-# Package bauen
-python -m build
+pip install badge-gen
 ```
 
-## CI/CD Workflows
+## Usage
 
-| Workflow | Zweck |
-|----------|-------|
-| `ci.yml` | Linting und Unit Tests (explizite Permissions) |
-| `multi-platform.yml` | Matrix-Testing (Linux, Windows, macOS) |
-| `security.yml` | Parallele Security-Scans |
-| `pages.yml` | GitHub Pages Deployment |
-| `deploy.yml` | PyPI Deployment mit Environments |
-| `config-demo.yml` | Variables und Secrets Demo |
+### Create a badge
 
-## Environment-Setup
+```bash
+# Output to stdout
+badge-gen create --name "build" --value "passing" --color green
 
-Für die Deployment-Workflows müssen folgende Environments konfiguriert werden:
-
-### Staging Environment
-- **Name:** `staging`
-- **Deployment Branches:** `develop`
-- **Secrets:** `STAGING_PYPI_TOKEN` (optional)
-
-### Production Environment
-- **Name:** `production`
-- **Deployment Branches:** `main`, `v*` tags
-- **Protection Rules:**
-  - Required Reviewers: 1-2 Maintainer
-  - Wait Timer: 10 Minuten (optional)
-- **Secrets:** `PROD_PYPI_TOKEN` (optional)
-
-### GitHub Pages Environment
-- **Name:** `github-pages`
-- Wird automatisch von GitHub erstellt
-
-## Variables und Secrets
-
-### Repository Variables (nicht sensitiv)
-```
-API_URL=https://api.example.com
-LOG_LEVEL=info
+# Save to file
+badge-gen create -n "coverage" -v "87%" -c yellow -o badge.svg
 ```
 
-### Repository Secrets (sensitiv)
+### Available colors
+
+- `green` - Success, passing
+- `yellow` - Warning, partial
+- `red` - Error, failing
+- `blue` - Info, default
+- `gray` - Inactive, unknown
+- `orange` - Important, attention
+
+## GitHub Actions Training
+
+This repository demonstrates:
+
+| Chapter | Topic |
+|---------|-------|
+| 1 | Event-Modell, Runner, Workflow-Syntax |
+| 2 | Jobs, Matrix-Strategien, Failure-Handling |
+| 3 | Secrets, Variables, Permissions, Environments |
+| 4 | Caching, Debugging, Performance-Optimierung |
+| 5 | Repository-Automatisierung, Conventional Commits |
+| 6 | Actions-Ökosystem, Composite Actions, Reusable Workflows |
+| 7 | Deployment-Strategien, GitHub Pages, PyPI Publishing |
+
+## Workflows
+
+| Workflow | Trigger | Description |
+|----------|---------|-------------|
+| `ci.yml` | Push, PR | Lint, test with matrix |
+| `release.yml` | Push to main | Automatic versioning and release |
+| `deploy-pages.yml` | Push to main | Deploy badge gallery to GitHub Pages |
+| `publish-pypi.yml` | Release published | Publish to PyPI via OIDC |
+
+## Environments
+
+| Environment | Purpose | Protection |
+|-------------|---------|------------|
+| `github-pages` | GitHub Pages | Auto |
+| `github-releases` | GitHub Releases | Optional |
+| `testpypi` | TestPyPI Publishing | Branch: main |
+| `pypi` | PyPI Publishing | Branch: main, Reviewer |
+
+## Development
+
+```bash
+# Install with dev dependencies
+make install
+
+# Run tests
+make test
+
+# Format code
+make format
+
+# Build package
+make build
 ```
-API_KEY=<your-api-key>
-STAGING_PYPI_TOKEN=<test-pypi-token>
-PROD_PYPI_TOKEN=<pypi-token>
-```
+
+## License
+
+MIT
