@@ -1,4 +1,5 @@
 """Tests for package version."""
+
 import badge_gen
 
 

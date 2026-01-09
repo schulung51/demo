@@ -1,0 +1,92 @@
+name: Cache Demo
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'pyproject.toml'
+      - 'requirements*.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  cache-builtin:
+    name: Built-in Cache (setup-python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python with built-in cache
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          echo "=== Installing dependencies ==="
+          pip install -e .[dev]
+          echo "=== Done ==="
+
+      - name: Show cache info
+        run: |
+          echo "=== Cache location ==="
+          pip cache dir
+          echo ""
+          echo "=== Cache size ==="
+          du -sh ~/.cache/pip 2>/dev/null || echo "No cache yet"
+
+  cache-manual:
+    name: Manual Cache (actions/cache)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python (no built-in cache)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          # Kein cache: 'pip' hier!
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v5
+        id: cache-pip
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Report cache status
+        run: |
+          echo "Cache hit: ${{ steps.cache-pip.outputs.cache-hit }}"
+
+      - name: Install dependencies
+        run: |
+          echo "=== Installing dependencies ==="
+          pip install -e .[dev]
+          echo "=== Done ==="
+
+  cache-comparison:
+    name: Cache Comparison Summary
+    needs: [cache-builtin, cache-manual]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "=== Caching Methods Comparison ==="
+          echo ""
+          echo "Built-in (setup-python):"
+          echo "  + Automatic key generation"
+          echo "  + Zero configuration"
+          echo "  + Handles restore-keys automatically"
+          echo "  - Less control over cache key"
+          echo ""
+          echo "Manual (actions/cache):"
+          echo "  + Full control over cache key"
+          echo "  + Can cache any path"
+          echo "  + Explicit cache-hit output"
+          echo "  - More YAML configuration"
+          echo ""
+          echo "Recommendation: Use built-in caching unless you need custom paths"
