@@ -1,0 +1,50 @@
+name: 'Setup Python Environment'
+description: 'Install Python, cache dependencies, and install project'
+author: 'badge-gen training project'
+
+inputs:
+  python-version:
+    description: 'Python version to use'
+    required: false
+    default: '3.12'
+  install-dev:
+    description: 'Install dev dependencies'
+    required: false
+    default: 'true'
+
+outputs:
+  cache-hit:
+    description: 'Whether pip cache was hit'
+    value: ${{ steps.setup-python.outputs.cache-hit }}
+  python-path:
+    description: 'Path to Python executable'
+    value: ${{ steps.setup-python.outputs.python-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python ${{ inputs.python-version }}
+      id: setup-python
+      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c  # v5.0.0
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: 'pip'
+
+    - name: Upgrade pip
+      shell: bash
+      run: python -m pip install --upgrade pip
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        if [[ "${{ inputs.install-dev }}" == "true" ]]; then
+          echo "Installing with dev dependencies..."
+          pip install -e .[dev]
+        else
+          echo "Installing without dev dependencies..."
+          pip install -e .
+        fi
+
+    - name: Show installed packages
+      shell: bash
+      run: pip list --format=columns | head -20

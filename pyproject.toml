@@ -4,12 +4,22 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "badge-gen"
-version = "0.3.0"
+version = "0.7.0"
 description = "Simple badge generator used as GitHub Actions training project"
 readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "MIT"}
 authors = [
   { name = "Training Project" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 dependencies = []
@@ -21,7 +31,14 @@ dev = [
     "ruff>=0.1.0",
     "mypy>=1.5",
     "build>=1.0",
+    "black>=24.0",
+    "bandit>=1.7",
 ]
+
+[project.urls]
+Homepage = "https://github.com/owner/badge-gen"
+Documentation = "https://owner.github.io/badge-gen"
+Repository = "https://github.com/owner/badge-gen"
 
 [project.scripts]
 badge-gen = "badge_gen.cli:main"
@@ -31,6 +48,10 @@ line-length = 88
 target-version = "py310"
 select = ["E", "F", "I"]
 
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311", "py312"]
+
 [tool.mypy]
 python_version = "3.10"
 strict = true
@@ -38,3 +59,13 @@ strict = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+]
