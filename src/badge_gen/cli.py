@@ -2,9 +2,7 @@ import argparse
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Generate simple repository badges"
-    )
+    parser = argparse.ArgumentParser(description="Generate simple repository badges")
     parser.add_argument(
         "--repo",
         required=True,

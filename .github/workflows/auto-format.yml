@@ -1,0 +1,55 @@
+name: Auto-Format
+
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    name: Format Code
+    runs-on: ubuntu-latest
+    # Nicht auf Bot-Commits reagieren
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # PR-Branch auschecken (nicht Merge-Commit)
+          ref: ${{ github.head_ref || github.ref }}
+          # Token für Push-Berechtigung
+          token: ${{ github.token }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install formatters
+        run: pip install black ruff
+
+      - name: Format with Black
+        run: black src/ tests/
+
+      - name: Fix with Ruff
+        run: ruff check --fix src/ tests/ || true
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        if: steps.git-check.outputs.changes == 'true'
+        with:
+          commit_message: "style: auto-format with black and ruff"
+          file_pattern: "*.py"
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
